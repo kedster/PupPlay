@@ -1,24 +1,34 @@
 {
   "name": "pupplay",
   "version": "1.0.0",
+  "description": "A comprehensive virtual pet simulation game with story mode, AI interactions, and multiple gameplay levels",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "test": "node test/game-test.js",
+    "dev": "node index.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kedster/PupPlay.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "pets",
+    "simulation",
+    "game",
+    "virtual-pets",
+    "ai",
+    "story-mode",
+    "cli-game"
+  ],
+  "author": "PupPlay Team",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/kedster/PupPlay/issues"
   },
   "homepage": "https://github.com/kedster/PupPlay#readme",
-  "description": "",
-  "dependencies": {
-    "puppeteer": "^22.15.0"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
