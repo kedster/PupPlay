@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PupPlay - Virtual Pet Simulation Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <h1>🐾 PupPlay</h1>
+            <p class="subtitle">Your Virtual Pet Adventure</p>
+        </header>
+
+        <div id="game-content">
+            <!-- Main Menu -->
+            <div id="main-menu" class="screen active">
+                <div class="menu-card">
+                    <h2>Welcome to PupPlay!</h2>
+                    <p>The ultimate virtual pet simulation game with AI-driven interactions and story mode adventures.</p>
+                    
+                    <div class="menu-options">
+                        <button class="menu-btn primary" onclick="showScreen('new-game')">
+                            🆕 New Game
+                        </button>
+                        <button class="menu-btn secondary" onclick="showScreen('load-game')">
+                            📂 Load Game
+                        </button>
+                        <button class="menu-btn" onclick="showScreen('about')">
+                            ℹ️ About
+                        </button>
+                    </div>
+                    
+                    <div class="cli-notice">
+                        <p><strong>Full Experience:</strong> Run <code>npm start</code> in terminal for the complete CLI interface with all features!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Game Screen -->
+            <div id="new-game" class="screen">
+                <div class="menu-card">
+                    <h2>🆕 Create New Game</h2>
+                    <form id="new-game-form">
+                        <div class="form-group">
+                            <label for="player-name">Player Name:</label>
+                            <input type="text" id="player-name" placeholder="Enter your name" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="menu-btn primary">Start Adventure</button>
+                            <button type="button" class="menu-btn" onclick="showScreen('main-menu')">Back</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Load Game Screen -->
+            <div id="load-game" class="screen">
+                <div class="menu-card">
+                    <h2>📂 Load Game</h2>
+                    <div id="save-list">
+                        <p>Available save files will be loaded here...</p>
+                        <div class="save-item">
+                            <span>Demo Player</span>
+                            <small>Level 3 • 2 pets • Last played: Today</small>
+                            <button class="load-btn">Load</button>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="menu-btn" onclick="showScreen('main-menu')">Back</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Screen -->
+            <div id="about" class="screen">
+                <div class="menu-card">
+                    <h2>ℹ️ About PupPlay</h2>
+                    <div class="about-content">
+                        <h3>🎮 Features</h3>
+                        <ul>
+                            <li><strong>Multiple Pet Species:</strong> Dogs, Cats, Birds, Fish, Hamsters, Rabbits</li>
+                            <li><strong>AI Behaviors:</strong> Pets interact autonomously with unique personalities</li>
+                            <li><strong>Story Mode:</strong> 4 chapters with progressive quests and AI-driven events</li>
+                            <li><strong>Pet Shop:</strong> Purchase pets, food, toys, and supplies</li>
+                            <li><strong>House Management:</strong> Upgrade your home and increase pet capacity</li>
+                            <li><strong>Progression System:</strong> Level up, earn money, unlock content</li>
+                        </ul>
+
+                        <h3>🚀 Getting Started</h3>
+                        <p>For the complete PupPlay experience with full CLI interface:</p>
+                        <div class="code-block">
+                            <code>npm start</code>
+                        </div>
+                        
+                        <h3>🧪 Testing</h3>
+                        <p>Run the test suite:</p>
+                        <div class="code-block">
+                            <code>npm test</code>
+                        </div>
+
+                        <h3>🔮 Future Expansions</h3>
+                        <ul>
+                            <li>Full web interface with GUI</li>
+                            <li>Multiplayer pet trading</li>
+                            <li>Mini-games and competitions</li>
+                            <li>Seasonal events</li>
+                            <li>Mobile support</li>
+                        </ul>
+                    </div>
+                    <div class="form-actions">
+                        <button class="menu-btn" onclick="showScreen('main-menu')">Back</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Demo Screen -->
+            <div id="game-demo" class="screen">
+                <div class="game-ui">
+                    <div class="player-status">
+                        <div class="status-item">
+                            <span class="label">👤 Player:</span>
+                            <span id="player-name-display">Loading...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">💰 Money:</span>
+                            <span id="player-money">$500</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">⭐ Level:</span>
+                            <span id="player-level">1</span>
+                        </div>
+                    </div>
+
+                    <div class="pets-section">
+                        <h3>🐾 Your Pets</h3>
+                        <div id="pets-list">
+                            <p class="empty-state">No pets yet! Visit the pet shop to adopt your first companion.</p>
+                        </div>
+                    </div>
+
+                    <div class="actions-section">
+                        <h3>🎯 Actions</h3>
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="simulateAction('shop')">🏪 Pet Shop</button>
+                            <button class="action-btn" onclick="simulateAction('house')">🏠 House</button>
+                            <button class="action-btn" onclick="simulateAction('story')">📖 Story</button>
+                            <button class="action-btn" onclick="simulateAction('help')">🤝 Help Neighbors</button>
+                        </div>
+                    </div>
+
+                    <div id="action-result" class="result-display"></div>
+
+                    <div class="cli-prompt">
+                        <p><strong>🖥️ Full CLI Experience:</strong></p>
+                        <p>This web interface shows the basic game concept. For the complete experience with all features, AI interactions, and story mode, run the CLI version:</p>
+                        <div class="code-block">
+                            <code>npm start</code>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="menu-btn" onclick="showScreen('main-menu')">Back to Menu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,3 +1,0 @@
-https://example.com
-https://news.ycombinator.com
-https://github.com
