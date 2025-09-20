@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PupPlay - 2D Pet Game</title>
+    <style>
+        /* CSS embedded for single-file delivery */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* UI Bar at the top */
+        .ui-bar {
+            height: 80px;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .pet-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .pet-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .stat-bar {
+            width: 80px;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .stat-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .stat-fill.hunger { background: #ff6b6b; }
+        .stat-fill.happiness { background: #51cf66; }
+        .stat-fill.cleanliness { background: #339af0; }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            padding: 8px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: #4c51bf;
+        }
+
+        /* Game Scene */
+        .game-scene {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scene {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+            padding: 20px;
+        }
+
+        .scene.active {
+            display: block;
+        }
+
+        /* Scene backgrounds - using CSS gradients as placeholders */
+        .scene.petshop {
+            background: linear-gradient(45deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .scene.home_kitchen {
+            background: linear-gradient(45deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .scene.bedroom {
+            background: linear-gradient(45deg, #d299c2 0%, #fef9d7 100%);
+        }
+
+        .scene.bathroom {
+            background: linear-gradient(45deg, #89f7fe 0%, #66a6ff 100%);
+        }
+
+        .scene.backyard {
+            background: linear-gradient(45deg, #a8e6cf 0%, #dcedc1 100%);
+        }
+
+        /* Hotspots - clickable areas in scenes */
+        .hotspot {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .hotspot:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: scale(1.05);
+            border-color: #5a67d8;
+        }
+
+        .hotspot:active {
+            transform: scale(0.95);
+        }
+
+        /* Pet sprite placeholder */
+        .pet-sprite {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            bottom: 50px;
+            left: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pet-sprite:hover {
+            transform: scale(1.1);
+        }
+
+        /* Feedback system */
+        .feedback {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        .feedback.show {
+            opacity: 1;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .ui-bar {
+                height: 70px;
+                padding: 0 10px;
+            }
+
+            .pet-name {
+                font-size: 18px;
+            }
+
+            .stat-bar {
+                width: 60px;
+            }
+
+            .nav-btn {
+                padding: 6px 8px;
+                font-size: 10px;
+            }
+
+            .hotspot {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .pet-sprite {
+                width: 60px;
+                height: 60px;
+                font-size: 18px;
+            }
+        }
+
+        /* Animation classes */
+        .bounce {
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .pulse {
+            animation: pulse 1s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- UI Bar -->
+        <div class="ui-bar">
+            <div class="pet-info">
+                <div class="pet-name" id="petName">Buddy</div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-label">🍽️ Hunger</div>
+                        <div class="stat-bar">
+                            <div class="stat-fill hunger" id="hungerBar"></div>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">😊 Happy</div>
+                        <div class="stat-bar">
+                            <div class="stat-fill happiness" id="happinessBar"></div>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">🛁 Clean</div>
+                        <div class="stat-bar">
+                            <div class="stat-fill cleanliness" id="cleanlinessBar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="changeScene('petshop')">🏪 Shop</button>
+                <button class="nav-btn" onclick="changeScene('home_kitchen')">🍳 Kitchen</button>
+                <button class="nav-btn" onclick="changeScene('bedroom')">🛏️ Bedroom</button>
+                <button class="nav-btn" onclick="changeScene('bathroom')">🛁 Bath</button>
+                <button class="nav-btn" onclick="changeScene('backyard')">🌳 Yard</button>
+            </div>
+        </div>
+
+        <!-- Game Scene Container -->
+        <div class="game-scene">
+            <!-- Pet Shop Scene -->
+            <div class="scene petshop active" id="petshop">
+                <!-- TODO: Replace with actual pet shop background asset -->
+                <div class="hotspot" style="top: 20%; left: 10%;" onclick="interact('buy_food')">
+                    🥫<br>Buy Food<br><small>-$10</small>
+                </div>
+                <div class="hotspot" style="top: 20%; right: 10%;" onclick="interact('buy_toy')">
+                    🎾<br>Buy Toy<br><small>-$15</small>
+                </div>
+                <div class="hotspot" style="bottom: 30%; left: 30%;" onclick="interact('buy_treat')">
+                    🍖<br>Special Treat<br><small>-$5</small>
+                </div>
+                <div class="pet-sprite" id="petSprite" onclick="petClick()">🐕</div>
+            </div>
+
+            <!-- Kitchen Scene -->
+            <div class="scene home_kitchen" id="home_kitchen">
+                <!-- TODO: Replace with actual kitchen background asset -->
+                <div class="hotspot" style="top: 15%; left: 15%;" onclick="interact('feed_pet')">
+                    🥣<br>Feed Pet<br><small>Reduces hunger</small>
+                </div>
+                <div class="hotspot" style="top: 15%; right: 15%;" onclick="interact('prepare_meal')">
+                    👨‍🍳<br>Cook Meal<br><small>Better nutrition</small>
+                </div>
+                <div class="hotspot" style="bottom: 25%; center: 50%;" onclick="interact('water_bowl')">
+                    💧<br>Water Bowl<br><small>Stay hydrated</small>
+                </div>
+                <div class="pet-sprite" onclick="petClick()">🐕</div>
+            </div>
+
+            <!-- Bedroom Scene -->
+            <div class="scene bedroom" id="bedroom">
+                <!-- TODO: Replace with actual bedroom background asset -->
+                <div class="hotspot" style="top: 20%; left: 20%;" onclick="interact('pet_rest')">
+                    🛏️<br>Rest<br><small>Restore energy</small>
+                </div>
+                <div class="hotspot" style="top: 20%; right: 20%;" onclick="interact('play_toy')">
+                    🧸<br>Play with Toy<br><small>+Happiness</small>
+                </div>
+                <div class="hotspot" style="bottom: 25%; left: 40%;" onclick="interact('cuddle')">
+                    🤗<br>Cuddle<br><small>Bonding time</small>
+                </div>
+                <div class="pet-sprite" onclick="petClick()">🐕</div>
+            </div>
+
+            <!-- Bathroom Scene -->
+            <div class="scene bathroom" id="bathroom">
+                <!-- TODO: Replace with actual bathroom background asset -->
+                <div class="hotspot" style="top: 25%; left: 20%;" onclick="interact('bath_pet')">
+                    🛁<br>Give Bath<br><small>+Cleanliness</small>
+                </div>
+                <div class="hotspot" style="top: 25%; right: 20%;" onclick="interact('brush_teeth')">
+                    🪥<br>Brush Teeth<br><small>Dental care</small>
+                </div>
+                <div class="hotspot" style="bottom: 30%; center: 40%;" onclick="interact('grooming')">
+                    ✂️<br>Grooming<br><small>Look great!</small>
+                </div>
+                <div class="pet-sprite" onclick="petClick()">🐕</div>
+            </div>
+
+            <!-- Backyard Scene -->
+            <div class="scene backyard" id="backyard">
+                <!-- TODO: Replace with actual backyard background asset -->
+                <div class="hotspot" style="top: 20%; left: 15%;" onclick="interact('play_fetch')">
+                    🎾<br>Play Fetch<br><small>+Happiness</small>
+                </div>
+                <div class="hotspot" style="top: 20%; right: 15%;" onclick="interact('explore')">
+                    🔍<br>Explore<br><small>Adventure time!</small>
+                </div>
+                <div class="hotspot" style="bottom: 25%; left: 35%;" onclick="interact('dig_hole')">
+                    🕳️<br>Dig Hole<br><small>Fun activity</small>
+                </div>
+                <div class="hotspot" style="top: 50%; right: 30%;" onclick="interact('chase_butterfly')">
+                    🦋<br>Chase Butterfly<br><small>Exercise</small>
+                </div>
+                <div class="pet-sprite" onclick="petClick()">🐕</div>
+            </div>
+
+            <!-- Feedback display -->
+            <div class="feedback" id="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================
+        // STATE MANAGER MODULE
+        // ==========================
+        class StateManager {
+            constructor() {
+                this.petState = {
+                    name: 'Buddy',
+                    hunger: 70,      // 0-100, lower is more hungry
+                    happiness: 80,   // 0-100, higher is happier  
+                    cleanliness: 90, // 0-100, higher is cleaner
+                    money: 50        // Player's money
+                };
+                this.currentScene = 'petshop';
+                this.loadState();
+            }
+
+            updateStat(stat, change) {
+                this.petState[stat] = Math.max(0, Math.min(100, this.petState[stat] + change));
+                this.saveState();
+                this.updateUI();
+            }
+
+            saveState() {
+                localStorage.setItem('pupplay_state', JSON.stringify(this.petState));
+            }
+
+            loadState() {
+                const saved = localStorage.getItem('pupplay_state');
+                if (saved) {
+                    this.petState = { ...this.petState, ...JSON.parse(saved) };
+                }
+                this.updateUI();
+            }
+
+            updateUI() {
+                document.getElementById('petName').textContent = this.petState.name;
+                document.getElementById('hungerBar').style.width = this.petState.hunger + '%';
+                document.getElementById('happinessBar').style.width = this.petState.happiness + '%';
+                document.getElementById('cleanlinessBar').style.width = this.petState.cleanliness + '%';
+            }
+
+            // Simulate pet needs degrading over time
+            simulateTime() {
+                this.updateStat('hunger', -0.5);
+                this.updateStat('cleanliness', -0.3);
+                if (this.petState.hunger < 30) {
+                    this.updateStat('happiness', -0.2);
+                }
+            }
+        }
+
+        // ==========================
+        // HOTSPOT COMPONENT MODULE  
+        // ==========================
+        class HotspotComponent {
+            constructor(element, action, effects) {
+                this.element = element;
+                this.action = action;
+                this.effects = effects;
+            }
+
+            trigger() {
+                // Apply stat changes
+                Object.entries(this.effects.stats || {}).forEach(([stat, change]) => {
+                    gameState.updateStat(stat, change);
+                });
+
+                // Apply money change
+                if (this.effects.money) {
+                    gameState.updateStat('money', this.effects.money);
+                }
+
+                // Show feedback
+                showFeedback(this.effects.message);
+
+                // Trigger animation
+                this.playAnimation();
+
+                return this.effects;
+            }
+
+            playAnimation() {
+                const pet = document.getElementById('petSprite');
+                const animations = ['bounce', 'shake', 'pulse'];
+                const randomAnim = animations[Math.floor(Math.random() * animations.length)];
+                
+                pet.classList.add(randomAnim);
+                setTimeout(() => pet.classList.remove(randomAnim), 600);
+            }
+        }
+
+        // ==========================
+        // SCENE FACTORY MODULE
+        // ==========================
+        class SceneFactory {
+            static createScene(sceneType) {
+                const scenes = {
+                    petshop: {
+                        background: 'linear-gradient(45deg, #ffecd2 0%, #fcb69f 100%)',
+                        hotspots: {
+                            buy_food: {
+                                stats: { hunger: 15 },
+                                money: -10,
+                                message: '🥫 Bought delicious food! Your pet is less hungry.'
+                            },
+                            buy_toy: {
+                                stats: { happiness: 10 },
+                                money: -15,
+                                message: '🎾 New toy acquired! Your pet is excited to play!'
+                            },
+                            buy_treat: {
+                                stats: { hunger: 5, happiness: 5 },
+                                money: -5,
+                                message: '🍖 Yummy treat! A small boost to hunger and happiness.'
+                            }
+                        }
+                    },
+                    home_kitchen: {
+                        background: 'linear-gradient(45deg, #a8edea 0%, #fed6e3 100%)',
+                        hotspots: {
+                            feed_pet: {
+                                stats: { hunger: 25 },
+                                message: '🥣 Fed your pet a nutritious meal! Much less hungry now.'
+                            },
+                            prepare_meal: {
+                                stats: { hunger: 35, happiness: 5 },
+                                message: '👨‍🍳 Prepared a gourmet meal! Your pet loves the special cooking!'
+                            },
+                            water_bowl: {
+                                stats: { hunger: 10 },
+                                message: '💧 Fresh water provided! Staying hydrated is important.'
+                            }
+                        }
+                    },
+                    bedroom: {
+                        background: 'linear-gradient(45deg, #d299c2 0%, #fef9d7 100%)',
+                        hotspots: {
+                            pet_rest: {
+                                stats: { happiness: 15 },
+                                message: '🛏️ Your pet had a nice rest! Feeling refreshed and happy.'
+                            },
+                            play_toy: {
+                                stats: { happiness: 20, cleanliness: -5 },
+                                message: '🧸 Playtime! Your pet is much happier but got a little messy.'
+                            },
+                            cuddle: {
+                                stats: { happiness: 25 },
+                                message: '🤗 Cuddle time! Your pet feels so loved and happy!'
+                            }
+                        }
+                    },
+                    bathroom: {
+                        background: 'linear-gradient(45deg, #89f7fe 0%, #66a6ff 100%)',
+                        hotspots: {
+                            bath_pet: {
+                                stats: { cleanliness: 40 },
+                                message: '🛁 Bath time complete! Your pet is squeaky clean!'
+                            },
+                            brush_teeth: {
+                                stats: { cleanliness: 15, happiness: 5 },
+                                message: '🪥 Dental hygiene maintained! Clean teeth, happy pet!'
+                            },
+                            grooming: {
+                                stats: { cleanliness: 25, happiness: 10 },
+                                message: '✂️ Professional grooming done! Looking fabulous!'
+                            }
+                        }
+                    },
+                    backyard: {
+                        background: 'linear-gradient(45deg, #a8e6cf 0%, #dcedc1 100%)',
+                        hotspots: {
+                            play_fetch: {
+                                stats: { happiness: 30, cleanliness: -10 },
+                                message: '🎾 Fetch was amazing! Super happy but got dirty from running.'
+                            },
+                            explore: {
+                                stats: { happiness: 15, cleanliness: -5 },
+                                message: '🔍 Great adventure exploring! Found some interesting smells.'
+                            },
+                            dig_hole: {
+                                stats: { happiness: 10, cleanliness: -15 },
+                                message: '🕳️ Digging is so much fun! Got very dirty but worth it!'
+                            },
+                            chase_butterfly: {
+                                stats: { happiness: 20 },
+                                message: '🦋 Chased butterflies around! Great exercise and fun!'
+                            }
+                        }
+                    }
+                };
+
+                return scenes[sceneType] || scenes.petshop;
+            }
+        }
+
+        // ==========================
+        // UI MODULE
+        // ==========================
+        class UIModule {
+            static showFeedback(message) {
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = message;
+                feedback.classList.add('show');
+                
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 3000);
+            }
+
+            static changeScene(sceneName) {
+                // Hide all scenes
+                document.querySelectorAll('.scene').forEach(scene => {
+                    scene.classList.remove('active');
+                });
+
+                // Show target scene
+                const targetScene = document.getElementById(sceneName);
+                if (targetScene) {
+                    targetScene.classList.add('active');
+                    gameState.currentScene = sceneName;
+                }
+
+                // Update navigation buttons
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                event.target.classList.add('active');
+            }
+        }
+
+        // ==========================
+        // GAME INITIALIZATION
+        // ==========================
+        let gameState;
+        let hotspotComponents = {};
+
+        // Initialize the game when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            gameState = new StateManager();
+
+            // Create hotspot components for all interactions
+            initializeHotspots();
+
+            // Start time simulation
+            setInterval(() => gameState.simulateTime(), 10000); // Every 10 seconds
+
+            console.log('🎮 PupPlay 2D Game initialized!');
+            console.log('📝 TODO: Add real sprite assets in assets/ folder');
+            console.log('🎨 TODO: Replace CSS gradient backgrounds with actual scene images');
+        });
+
+        function initializeHotspots() {
+            const scenes = ['petshop', 'home_kitchen', 'bedroom', 'bathroom', 'backyard'];
+            
+            scenes.forEach(sceneName => {
+                const sceneData = SceneFactory.createScene(sceneName);
+                hotspotComponents[sceneName] = {};
+                
+                Object.entries(sceneData.hotspots).forEach(([action, effects]) => {
+                    hotspotComponents[sceneName][action] = new HotspotComponent(null, action, effects);
+                });
+            });
+        }
+
+        // ==========================
+        // GLOBAL INTERACTION FUNCTIONS
+        // ==========================
+        function interact(action) {
+            const scene = gameState.currentScene;
+            const hotspot = hotspotComponents[scene][action];
+            
+            if (hotspot) {
+                // Check if player can afford purchases
+                if (hotspot.effects.money && hotspot.effects.money < 0) {
+                    if (gameState.petState.money < Math.abs(hotspot.effects.money)) {
+                        showFeedback('💸 Not enough money for this purchase!');
+                        return;
+                    }
+                }
+                
+                hotspot.trigger();
+            }
+        }
+
+        function changeScene(sceneName) {
+            UIModule.changeScene(sceneName);
+        }
+
+        function showFeedback(message) {
+            UIModule.showFeedback(message);
+        }
+
+        function petClick() {
+            const messages = [
+                '🐕 Woof! Your pet is happy to see you!',
+                '❤️ Your pet nuzzles against you lovingly!',
+                '🎾 Your pet wants to play!',
+                '😊 Your pet wags their tail excitedly!',
+                '🐾 Your pet does a little spin of joy!'
+            ];
+            
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            showFeedback(randomMessage);
+            
+            // Small happiness boost for interaction
+            gameState.updateStat('happiness', 2);
+        }
+
+        // ==========================
+        // EXAMPLE: ADDING NEW SCENE
+        // ==========================
+        /* 
+        TODO: Example of adding a new "park" scene:
+
+        1. Add HTML for the scene in the game-scene container:
+        <div class="scene park" id="park">
+            <div class="hotspot" style="top: 20%; left: 20%;" onclick="interact('play_slide')">
+                🛝<br>Play Slide<br><small>Fun time!</small>
+            </div>
+            <div class="pet-sprite" onclick="petClick()">🐕</div>
+        </div>
+
+        2. Add navigation button:
+        <button class="nav-btn" onclick="changeScene('park')">🏞️ Park</button>
+
+        3. Add CSS for background:
+        .scene.park {
+            background: linear-gradient(45deg, #74b9ff 0%, #0984e3 100%);
+        }
+
+        4. Add scene data to SceneFactory:
+        park: {
+            background: 'linear-gradient(45deg, #74b9ff 0%, #0984e3 100%)',
+            hotspots: {
+                play_slide: {
+                    stats: { happiness: 25 },
+                    message: '🛝 Wheee! Sliding is so much fun!'
+                }
+            }
+        }
+        */
+
+    </script>
+</body>
+</html>
