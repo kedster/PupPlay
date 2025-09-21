@@ -1,7 +1,7 @@
 {
   "name": "pupplay",
   "version": "1.0.0",
-  "description": "A comprehensive virtual pet simulation game with story mode, AI interactions, and multiple gameplay levels",
+  "description": "A Virtual Pet Simulation Game in JavaScript",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -15,12 +15,21 @@
   },
   "keywords": [
     "pets",
-    "simulation",
+    "simulation", 
     "game",
     "virtual-pets",
     "ai",
     "story-mode",
-    "cli-game"
+    "cli-game",
+    "javascript",
+    "nodejs",
+    "pet-care",
+    "interactive",
+    "terminal",
+    "console-game",
+    "pet-simulation",
+    "tamagotchi",
+    "virtual-companion"
   ],
   "author": "PupPlay Team",
   "license": "ISC",
